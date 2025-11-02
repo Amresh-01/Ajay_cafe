@@ -45,32 +45,29 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!/\S+@\S+\.\S+/.test(email)) {
     throw new ApiError(400, "Invalid email format");
   }
-  if (
-    !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
-      password
-    )
-  ) {
-    throw new ApiError(
-      400,
-      "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
-    );
-  }
 
   const exists = await User.findOne({ $or: [{ email }, { username }] });
   if (exists) {
     throw new ApiError(409, "User with given email or username already exists");
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-
   const user = new User({
     username,
     email,
-    password: hashedPassword,
+    password,
     role,
   });
 
   await user.save();
+
+  try {
+    await user.save();
+  } catch (err) {
+    if (err.name === "ValidationError") {
+      throw new ApiError(400, Object.values(err.errors)[0].message);
+    }
+    throw err;
+  }
 
   return res.status(201).json(
     new ApiResponse(
@@ -119,7 +116,13 @@ const loginUser = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        { accessToken, refreshToken, role: user.role },
+        {
+          accessToken,
+          refreshToken,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+        },
         "Login successful"
       )
     );

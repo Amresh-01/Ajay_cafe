@@ -21,24 +21,15 @@ const userSchema = new mongoose.Schema(
       required: function () {
         return !this.googleId;
       },
-      validate: {
-        validator: function (v) {
-          if (this.googleId || !v) return true;
-          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
-            v
-          );
-        },
-        message:
-          "Password must be ar leasr 8 characters long and include uppercase, lowercase, number, and special character",
-      },
     },
     googleId: {
       type: String,
     },
     role: {
       type: String,
-      enum: ["Owner", "Customer"],
+      enum: ["owner", "customer"],
       required: true,
+      lowercase: true,
     },
     refreshToken: {
       type: String,
@@ -46,6 +37,26 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  const plainPassword = this.password;
+
+  if (!this.googleId) {
+    const strongPassword =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!strongPassword.test(plainPassword)) {
+      return next(
+        new Error(
+          "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
+        )
+      );
+    }
+  }
+
+  this.password = await bcrypt.hash(plainPassword, 10);
+  next();
+});
 
 const User = mongoose.model("User", userSchema);
 export default User;
