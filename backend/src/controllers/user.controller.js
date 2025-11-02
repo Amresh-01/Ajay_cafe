@@ -122,24 +122,6 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-const sendOtp = asyncHandler(async (req, res) => {
-  const { email } = req.body;
-
-  if (!email) {
-    throw new ApiError(400, "Email is required");
-  }
-
-  const user = await User.findOne({ email });
-  if (!user) throw new ApiError(404, "User not found");
-
-  const otp = crypto.randomInt(100000, 999999).toString();
-
-  const hashedOtp = await bcrypt.hash(otp, 10);
-  user.otp = hashedOtp;
-  user.otpExpires = Date.now() + 2 * 60 * 1000;
-  await user.save();
-});
-
 const logoutUser = asyncHandler(async (req, res) => {
   const userId = req.user?.id;
   if (!userId) throw new ApiError(401, "User is not authenticated");
@@ -202,4 +184,10 @@ export const googleCallback = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser, logoutUser, updateUserProfile };
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  updateUserProfile,
+  googleCallback,
+};
