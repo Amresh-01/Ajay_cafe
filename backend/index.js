@@ -2,9 +2,7 @@ import express, { application } from "express";
 import dotenv from "dotenv";
 import connectDB from "./src/db/db.connect.js";
 import cors from "cors";
-import authRoutes from "./src/routes/authRoutes.js";
-import jobsRoutes from "./src/routes/jobsRoutes.js";
-import applicationsRoutes from "./src/routes/appliactionsRoutes.js";
+import userRoutes from "./src/routes/userRoutes.js";
 import passport from "./src/config/passport.js";
 import session from "express-session";
 
@@ -34,7 +32,7 @@ app.use("/google-success", (req, res) => {
   res.send("Google Login Succesfully.");
 });
 
-app.use("/api/user", authRoutes);
+app.use("/api/user", userRoutes);
 
 const startServer = async () => {
   try {

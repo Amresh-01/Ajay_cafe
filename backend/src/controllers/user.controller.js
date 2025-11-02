@@ -5,6 +5,7 @@ import User from "../models/user.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 
@@ -13,6 +14,8 @@ const {
   JWT_REFRESH_SECRET,
   ACCESS_TOKEN_EXPIRES,
   REFRESH_TOKEN_EXPIRES,
+  MAIL_PASS,
+  MAIL_USER,
 } = process.env;
 
 function signAccessToken(user) {
@@ -29,7 +32,7 @@ function signRefreshToken(user) {
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
-  auth: { user: EMAIL_USER, pass: EMAIL_PASS },
+  auth: { user: MAIL_USER, pass: MAIL_PASS },
 });
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -165,7 +168,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updatedUser, "Profile updated successfully"));
 });
 
-export const googleCallback = async (req, res) => {
+const googleCallback = async (req, res) => {
   try {
     const user = req.user;
 
