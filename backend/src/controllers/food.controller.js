@@ -52,7 +52,7 @@ const getAllFoods = asyncHandler(async (req, res) => {
 });
 
 const getFoodById = asyncHandler(async (req, res) => {
-  const food = await Food.findById(req.params.id);
+  const food = await Food.findById(req.params.foodId);
 
   if (!food) throw new ApiError(404, "Food not found");
 
@@ -72,10 +72,14 @@ const updateFood = asyncHandler(async (req, res) => {
     fs.unlinkSync(req.file.path);
   }
 
-  const updatedFood = await Food.findByIdAndUpdate(req.params.id, updateData, {
-    new: true,
-    runValidators: true,
-  });
+  const updatedFood = await Food.findByIdAndUpdate(
+    req.params.foodId,
+    updateData,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
   if (!updatedFood) {
     throw new ApiError(404, "Food not found");
@@ -87,7 +91,7 @@ const updateFood = asyncHandler(async (req, res) => {
 });
 
 const deleteFood = asyncHandler(async (req, res) => {
-  const food = await Food.findById(req.params.id);
+  const food = await Food.findById(req.params.foodId);
 
   if (!food) throw new ApiError(404, "Food not found");
 
@@ -112,7 +116,7 @@ const rateFood = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Rating must be between 0 and 5");
   }
 
-  const food = await Food.findById(req.params.id);
+  const food = await Food.findById(req.params.foodId);
   if (!food) throw new ApiError(404, "Food not found");
 
   await food.updateRating(rating);

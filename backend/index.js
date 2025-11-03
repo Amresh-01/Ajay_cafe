@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import connectDB from "./src/db/db.connect.js";
 import cors from "cors";
 import userRoutes from "./src/routes/userRoutes.js";
+import foodRoutes from "./src/routes/foodRoutes.js";
+import orderRoutes from "./src/routes/orderRoutes.js";
 import passport from "./src/config/passport.js";
 import session from "express-session";
 
@@ -33,6 +35,8 @@ app.use("/google-success", (req, res) => {
 });
 
 app.use("/api/user", userRoutes);
+app.use("/api/foods", foodRoutes);
+app.use("api/order", orderRoutes);
 
 const startServer = async () => {
   try {
