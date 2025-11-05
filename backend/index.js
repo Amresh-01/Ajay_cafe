@@ -5,6 +5,7 @@ import cors from "cors";
 import userRoutes from "./src/routes/userRoutes.js";
 import foodRoutes from "./src/routes/foodRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
+import reviewRoutes from "./src/routes/reviewRoutes.js";
 import cartRoutes from "./src/routes/cartRoutes.js";
 import passport from "./src/config/passport.js";
 import session from "express-session";
@@ -39,6 +40,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/foods", foodRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/review", reviewRoutes);
 
 const startServer = async () => {
   try {
