@@ -2,7 +2,7 @@ import Food from "../models/food.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
-import cloudinary from "../config/cloudinary.js";
+import cloudinary from "../utils/cloudinary.js";
 import fs from "fs";
 
 const createFood = asyncHandler(async (req, res) => {
@@ -119,11 +119,13 @@ const rateFood = asyncHandler(async (req, res) => {
   const food = await Food.findById(req.params.foodId);
   if (!food) throw new ApiError(404, "Food not found");
 
-  await food.updateRating(rating);
+  const updatedFood = await food.updateRating(rating);
 
   res
     .status(200)
-    .json(new ApiResponse(200, food, "Food rating updated successfully"));
+    .json(
+      new ApiResponse(200, updatedFood, "Food rating updated successfully")
+    );
 });
 
 export {

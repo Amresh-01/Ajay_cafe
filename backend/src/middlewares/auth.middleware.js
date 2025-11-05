@@ -7,18 +7,16 @@ dotenv.config();
 export const protect = async (req, res, next) => {
   const authHeader = req.header("Authorization");
 
-  // Check if Authorization header starts with Bearer
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ success: false, msg: "No Token Provided." });
+    return res
+      .status(401)
+      .json({ success: false, message: "No token provided." });
   }
 
   const token = authHeader.split(" ")[1];
-  console.log("Token....", token);
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-    console.log("decoded token ...", decoded);
-    console.log("Current timestamp:", Math.floor(Date.now() / 1000));
-
     const user = await User.findById(decoded.sub).select("-password");
 
     if (!user) {
@@ -31,10 +29,21 @@ export const protect = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      return res
-        .status(401)
-        .json({ message: "Token has expired. Please login again." });
+      return res.status(401).json({
+        success: false,
+        message: "Token expired. Please login again.",
+      });
     }
-    res.status(401).json({ message: "Invalid token." });
+
+    return res.status(401).json({ success: false, message: "Invalid token." });
   }
+};
+
+export const admin = (req, res, next) => {
+  if (!req.user || req.user.role !== "owner") {
+    return res
+      .status(403)
+      .json({ success: false, message: "Access denied. Owner only." });
+  }
+  next();
 };

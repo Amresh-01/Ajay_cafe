@@ -21,7 +21,7 @@ const foodSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    rating: {
+    averageRating: {
       type: Number,
       max: 5,
       min: 0,
@@ -39,7 +39,7 @@ const foodSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-ffoodSchema.methods.updateRating = function (newRating) {
+foodSchema.methods.updateRating = function (newRating) {
   this.averageRating =
     (this.averageRating * this.reviewCount + newRating) /
     (this.reviewCount + 1);

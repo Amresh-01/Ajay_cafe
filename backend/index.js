@@ -37,8 +37,8 @@ app.use("/google-success", (req, res) => {
 
 app.use("/api/user", userRoutes);
 app.use("/api/foods", foodRoutes);
-app.use("api/order", orderRoutes);
-app.use("api/cart", cartRoutes);
+app.use("/api/order", orderRoutes);
+app.use("/api/cart", cartRoutes);
 
 const startServer = async () => {
   try {

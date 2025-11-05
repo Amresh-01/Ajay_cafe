@@ -30,7 +30,7 @@ const createOrder = asyncHandler(async (req, res) => {
   );
 
   const order = await Order.create({
-    user: req.user._id,
+    customer: req.user._id,
     items: orderItems,
     tableNumber,
     paymentMethod,
@@ -44,7 +44,7 @@ const createOrder = asyncHandler(async (req, res) => {
 
 const getAllOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find()
-    .populate("user", "name email")
+    .populate("customer", "name email")
     .populate("items.food", "name price");
 
   res
@@ -54,7 +54,7 @@ const getAllOrders = asyncHandler(async (req, res) => {
 
 const getOrderById = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.orderId)
-    .populate("user", "name email")
+    .populate("customer", "name email")
     .populate("items.food", "name price");
 
   if (!order) {
@@ -94,19 +94,7 @@ const deleteOrder = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, {}, "Order deleted successfully"));
 });
 
-const getMyOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ user: req.user._id }).populate(
-    "items.food",
-    "name price"
-  );
-
-  res
-    .status(200)
-    .json(new ApiResponse(200, orders, "User orders fetched successfully"));
-});
-
 export {
-  getMyOrders,
   deleteOrder,
   updateOrderStatus,
   getOrderById,
