@@ -60,6 +60,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/foods", foodRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/payment", paymentRoutes);
 app.use("/api/review", reviewRoutes);
 
 const startServer = async () => {
