@@ -7,6 +7,7 @@ import foodRoutes from "./src/routes/foodRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
 import reviewRoutes from "./src/routes/reviewRoutes.js";
 import cartRoutes from "./src/routes/cartRoutes.js";
+import paymentRoutes from "./src/routes/paymentRoutes.js";
 import passport from "./src/config/passport.js";
 import session from "express-session";
 
