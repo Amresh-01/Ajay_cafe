@@ -54,7 +54,7 @@ const getAllFoods = asyncHandler(async (req, res) => {
 const getFoodById = asyncHandler(async (req, res) => {
   const food = await Food.findById(req.params.foodId);
 
-  console.log("Food is here.....", food);
+  // console.log("Food is here.....", food);
 
   if (!food) throw new ApiError(404, "Food not found");
 

@@ -15,10 +15,9 @@ dotenv.config();
 const app = express();
 const PORT = 8080;
 
-
 const allowedOrigins = [
   "https://canteeno.netlify.app",
-  "http://localhost:5173", // local dev (Vite default)
+  "http://localhost:5173",
 ];
 
 app.use(
