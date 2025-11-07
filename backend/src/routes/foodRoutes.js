@@ -8,6 +8,7 @@ import {
   rateFood,
 } from "../controllers/food.controller.js";
 import upload from "../middlewares/multer.middleware.js";
+import { protect } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
