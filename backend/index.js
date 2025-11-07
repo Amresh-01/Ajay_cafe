@@ -1,46 +1,38 @@
 import express from "express";
 import dotenv from "dotenv";
-import connectDB from "./src/db/db.connect.js";
 import cors from "cors";
+import session from "express-session";
+import passport from "./src/config/passport.js";
+
+import connectDB from "./src/db/db.connect.js";
+
+// Routes
 import userRoutes from "./src/routes/userRoutes.js";
 import foodRoutes from "./src/routes/foodRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
 import reviewRoutes from "./src/routes/reviewRoutes.js";
 import cartRoutes from "./src/routes/cartRoutes.js";
+import menuRoutes from "./src/routes/menuRoutes.js";
 import paymentRoutes from "./src/routes/paymentRoutes.js";
-import passport from "./src/config/passport.js";
-import session from "express-session";
 
 dotenv.config();
 
 const app = express();
-const PORT = 8080;
-
-const allowedOrigins = [
-  "https://canteeno.netlify.app",
-  "http://localhost:5173",
-];
+const PORT = process.env.PORT || 8080;
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: true,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 app.use(express.json());
-
 app.use(
   session({
-    secret: "someSecretKey",
+    secret: process.env.SESSION_SECRET || "someSecretKey",
     resave: false,
     saveUninitialized: false,
   })
@@ -50,11 +42,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get("/", (req, res) => {
-  res.send("Ajay Cafe backend is running ");
+  res.send("Ajay Cafe backend is running 🚀");
 });
 
-app.use("/google-success", (req, res) => {
-  res.send("Google Login Successfully ");
+app.get("/google-success", (req, res) => {
+  res.send("Google Login Successful ✅");
 });
 
 app.use("/api/user", userRoutes);
@@ -62,6 +54,7 @@ app.use("/api/foods", foodRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/menu", menuRoutes);
 app.use("/api/review", reviewRoutes);
 
 const startServer = async () => {

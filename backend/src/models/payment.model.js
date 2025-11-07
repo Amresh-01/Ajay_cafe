@@ -24,7 +24,7 @@ const paymentSchema = new mongoose.Schema(
     },
     amount: {
       type: Number,
-      required: true, // stored in paise
+      required: true, 
     },
     status: {
       type: String,

@@ -4,15 +4,14 @@ import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 
 const createMenuItem = asyncHandler(async (req, res) => {
-  const { FoodName, description, price, category, image, isAvailable } =
-    req.body;
+  const { name, description, price, category, image, isAvailable } = req.body;
 
-  if (!FoodName || !price) {
+  if (!name || !price) {
     throw new ApiError(400, "Food name and price are required");
   }
 
   const newMenuItem = await Food.create({
-    FoodName,
+    name,
     description,
     price,
     category,
@@ -38,9 +37,7 @@ const getMenuItemById = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const menuItem = await Food.findById(id);
 
-  if (!menuItem) {
-    throw new ApiError(404, "Menu item not found");
-  }
+  if (!menuItem) throw new ApiError(404, "Menu item not found");
 
   res
     .status(200)
@@ -53,9 +50,7 @@ const updateMenuItem = asyncHandler(async (req, res) => {
 
   const updatedItem = await Food.findByIdAndUpdate(id, updates, { new: true });
 
-  if (!updatedItem) {
-    throw new ApiError(404, "Menu item not found");
-  }
+  if (!updatedItem) throw new ApiError(404, "Menu item not found");
 
   res
     .status(200)
@@ -64,12 +59,9 @@ const updateMenuItem = asyncHandler(async (req, res) => {
 
 const deleteMenuItem = asyncHandler(async (req, res) => {
   const { id } = req.params;
-
   const deletedItem = await Food.findByIdAndDelete(id);
 
-  if (!deletedItem) {
-    throw new ApiError(404, "Menu item not found");
-  }
+  if (!deletedItem) throw new ApiError(404, "Menu item not found");
 
   res
     .status(200)

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const foodSchema = new mongoose.Schema(
   {
-    FoodName: {
+    name: {
       type: String,
       required: [true, "Food name is required"],
       trim: true,
