@@ -8,9 +8,7 @@ models/
 ├── review.model.js
 ├── notification.model.js
 ├── coupon.model.js
-├── otp.model.js
 ├── adminAnalytics.model.js
 ├── wishlist.model.js
-├── tableBooking.model.js
 ├── deliveryAnalytics.model.js
 └── transactionLog.model.js

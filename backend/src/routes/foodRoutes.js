@@ -11,11 +11,11 @@ import upload from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
-router.post("/createFood", upload.single("image"), createFood);
+router.post("/createFood", protect, upload.single("image"), createFood);
 router.get("/AllFoods", getAllFoods);
-router.get("/getfoodById/:foodId", getFoodById);
-router.put("/updateFood/:foodId", upload.single("image"), updateFood);
-router.delete("/deleteFood/:foodId", deleteFood);
-router.post("/rate/:foodId", rateFood);
+router.get("/getfoodById/:fooId", protect, getFoodById);
+router.put("/updateFood/:foodId", protect, upload.single("image"), updateFood);
+router.delete("/deleteFood/:foodId", protect, deleteFood);
+router.post("/rate/:id", protect, rateFood);
 
 export default router;
