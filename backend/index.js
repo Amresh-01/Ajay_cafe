@@ -1,4 +1,4 @@
-import express, { application } from "express";
+import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./src/db/db.connect.js";
 import cors from "cors";
@@ -15,9 +15,29 @@ dotenv.config();
 const app = express();
 const PORT = 8080;
 
-app.use(cors({ origin: "https://canteeno.netlify.app/", credentials: true }));
+
+const allowedOrigins = [
+  "https://canteeno.netlify.app",
+  "http://localhost:5173", // local dev (Vite default)
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
+
 app.use(
   session({
     secret: "someSecretKey",
@@ -25,15 +45,16 @@ app.use(
     saveUninitialized: false,
   })
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.get("/", (req, res) => {
-  res.send("Ajay cafe backend is running");
+  res.send("Ajay Cafe backend is running ");
 });
 
 app.use("/google-success", (req, res) => {
-  res.send("Google Login Succesfully.");
+  res.send("Google Login Successfully ");
 });
 
 app.use("/api/user", userRoutes);
@@ -46,10 +67,10 @@ const startServer = async () => {
   try {
     await connectDB(process.env.MONGO_URI);
     app.listen(PORT, () => {
-      console.log(`Server is running on Port http://localhost:${PORT}`);
+      console.log(`Server running at http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.log("Server is not running...", error.message);
+    console.error("Server failed to start:", error.message);
     process.exit(1);
   }
 };
