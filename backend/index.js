@@ -20,11 +20,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-const {link1,link2} = process.env
+const { link1, link2 } = process.env;
 
 app.use(
   cors({
-    origin: ['http://localhost:5173',link1,link2],
+    origin: ["http://localhost:5173", link1, link2],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -58,6 +58,16 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/review", reviewRoutes);
+
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+    errors: err.errors || [],
+    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+  });
+});
 
 const startServer = async () => {
   try {
