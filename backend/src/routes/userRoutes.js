@@ -17,7 +17,7 @@ router.post("/login", loginUser);
 router.post("/logout", protect, logoutUser);
 router.put("/updateDetails", protect, updateUserProfile);
 router.get(
-  "/google-login",
+  "/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
     session: false,
@@ -25,7 +25,7 @@ router.get(
 );
 
 router.get(
-  "/google-login/callback",
+  "/google/callback",
   passport.authenticate("google", {
     failureRedirect: "/login",
     session: false,
