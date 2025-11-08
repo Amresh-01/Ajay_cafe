@@ -15,6 +15,6 @@ router.post("/create", protect, admin, createMenuItem);
 router.get("/getMenu", getAllMenuItems);
 router.get("/getMenuById/:id", getMenuItemById);
 router.put("/update/:id", protect, admin, updateMenuItem);
-router.delete("/delte/:id", protect, admin, deleteMenuItem);
+router.delete("/delete/:id", protect, admin, deleteMenuItem);
 
 export default router;
