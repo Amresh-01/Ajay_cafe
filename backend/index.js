@@ -14,6 +14,7 @@ import reviewRoutes from "./src/routes/reviewRoutes.js";
 import cartRoutes from "./src/routes/cartRoutes.js";
 import menuRoutes from "./src/routes/menuRoutes.js";
 import paymentRoutes from "./src/routes/paymentRoutes.js";
+import adminRoutes from "./src/routes/adminRoutes.js";
 
 dotenv.config();
 
@@ -52,6 +53,7 @@ app.get("/google-success", (req, res) => {
 });
 
 app.use("/api/user", userRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/foods", foodRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/cart", cartRoutes);
