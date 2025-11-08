@@ -182,7 +182,7 @@ const googleCallback = async (req, res) => {
     await user.save();
 
     res.redirect(
-      `http://localhost:8080/google-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
+      `https://ajay-cafe-1.onrender.com/google-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
     );
   } catch (err) {
     console.error(err);

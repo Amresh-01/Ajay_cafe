@@ -42,11 +42,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get("/", (req, res) => {
-  res.send("Ajay Cafe backend is running 🚀");
+  res.send("Ajay Cafe backend is running");
 });
 
 app.get("/google-success", (req, res) => {
-  res.send("Google Login Successful ✅");
+  res.send("Google Login Successful");
 });
 
 app.use("/api/user", userRoutes);
