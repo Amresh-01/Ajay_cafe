@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 8080;
 
 app.use(
   cors({
-    origin: true,
+    origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
