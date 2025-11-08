@@ -20,9 +20,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+const {link1,link2} = process.env
+
 app.use(
   cors({
-    origin: "*",
+    origin: ['http://localhost:5173',link1,link2],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
