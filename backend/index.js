@@ -31,6 +31,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+app.options(/.*/, cors());
 
 app.use(express.json());
 app.use(
@@ -70,6 +71,7 @@ app.use((err, req, res, next) => {
     stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
   });
 });
+app.options(/.*/, cors());
 
 const startServer = async () => {
   try {

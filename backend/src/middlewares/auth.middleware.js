@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const protect = async (req, res, next) => {
-  const authHeader = req.header("Authorization");
+  const authHeader = req.headers["authorization"];
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res
@@ -25,7 +25,7 @@ export const protect = async (req, res, next) => {
         .json({ success: false, message: "User not found." });
     }
 
-    req.user = user;
+    req.user = { id: user._id, role: user.role, username: user.username };
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
@@ -43,7 +43,7 @@ export const admin = (req, res, next) => {
   if (!req.user || req.user.role !== "admin") {
     return res
       .status(403)
-      .json({ success: false, message: "Access denied. admin only." });
+      .json({ success: false, message: "Access denied. Admin only." });
   }
   next();
 };
