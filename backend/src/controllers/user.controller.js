@@ -73,7 +73,7 @@ const registerUser = asyncHandler(async (req, res) => {
     new ApiResponse(
       201,
       {
-        id: user._id,
+        _id: user._id,
         username: user.username,
         email: user.email,
         role: user.role,
@@ -129,7 +129,7 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-  const userId = req.user?.id;
+  const userId = req.user?._id;
   if (!userId) throw new ApiError(401, "User is not authenticated");
 
   await User.findByIdAndUpdate(userId, { $unset: { refreshToken: 1 } });
@@ -148,7 +148,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const updateUserProfile = asyncHandler(async (req, res) => {
-  const userId = req.user?.id;
+  const userId = req.user?._id;
   const { newUsername, newEmail } = req.body;
 
   if (!userId) throw new ApiError(401, "User not authenticated");
