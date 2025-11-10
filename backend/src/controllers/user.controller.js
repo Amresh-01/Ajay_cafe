@@ -170,7 +170,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, updatedUser, "Profile updated successfully"));
 });
-
 const googleCallback = async (req, res) => {
   try {
     const user = req.user;
@@ -181,8 +180,13 @@ const googleCallback = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
+    const frontendURL =
+      process.env.NODE_ENV === "production"
+        ? "https://ajay-cafe-frontend.onrender.com" // your actual frontend URL
+        : "http://localhost:5173";
+
     res.redirect(
-      `https://ajay-cafe-1.onrender.com/google-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
+      `${frontend}/google-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
     );
   } catch (err) {
     console.error(err);
