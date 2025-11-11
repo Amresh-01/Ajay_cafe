@@ -3,10 +3,14 @@ import dotenv from "dotenv";
 import cors from "cors";
 import session from "express-session";
 import passport from "./src/config/passport.js";
-
 import connectDB from "./src/db/db.connect.js";
 
-// Routes
+import {
+  securityHeaders,
+  apiLimiter,
+  ipBlocker,
+  detectBot,
+} from "./src/middlewares/security.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import foodRoutes from "./src/routes/foodRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
@@ -20,7 +24,6 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-
 const { link1, link2 } = process.env;
 
 app.use(
@@ -33,6 +36,7 @@ app.use(
 );
 app.options(/.*/, cors());
 app.use(express.json());
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "someSecretKey",
@@ -44,13 +48,13 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/", (req, res) => {
-  res.send("Ajay Cafe backend is running");
-});
+app.use(securityHeaders);
+app.use(ipBlocker);
+app.use(detectBot);
+app.use("/api", apiLimiter);
 
-app.get("/google-success", (req, res) => {
-  res.send("Google Login Successful");
-});
+app.get("/", (req, res) => res.send("Ajay Cafe backend is running"));
+app.get("/google-success", (req, res) => res.send("Google Login Successful"));
 
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
@@ -70,14 +74,13 @@ app.use((err, req, res, next) => {
     stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
   });
 });
-app.options(/.*/, cors());
 
 const startServer = async () => {
   try {
     await connectDB(process.env.MONGO_URI);
-    app.listen(PORT, () => {
-      console.log(`Server running at http://localhost:${PORT}`);
-    });
+    app.listen(PORT, () =>
+      console.log(`Server running at http://localhost:${PORT}`)
+    );
   } catch (error) {
     console.error("Server failed to start:", error.message);
     process.exit(1);
