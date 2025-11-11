@@ -8,7 +8,6 @@ import connectDB from "./src/db/db.connect.js";
 import {
   securityHeaders,
   apiLimiter,
-  ipBlocker,
   detectBot,
 } from "./src/middlewares/security.js";
 import userRoutes from "./src/routes/userRoutes.js";
@@ -49,7 +48,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(securityHeaders);
-app.use(ipBlocker);
 app.use(detectBot);
 app.use("/api", apiLimiter);
 

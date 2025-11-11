@@ -2,7 +2,6 @@
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
-import { IpFilter } from "express-ipfilter";
 import axios from "axios";
 
 dotenv.config();
