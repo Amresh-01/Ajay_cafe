@@ -5,11 +5,19 @@ import session from "express-session";
 import passport from "./src/config/passport.js";
 import connectDB from "./src/db/db.connect.js";
 
+
+import helmet from "helmet";
+import hpp from "hpp";
+import xss from "xss-clean";
+import mongoSanitize from "express-mongo-sanitize";
+
 import {
   securityHeaders,
   apiLimiter,
   detectBot,
 } from "./src/middlewares/security.js";
+
+// Routes
 import userRoutes from "./src/routes/userRoutes.js";
 import foodRoutes from "./src/routes/foodRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
@@ -18,13 +26,16 @@ import cartRoutes from "./src/routes/cartRoutes.js";
 import menuRoutes from "./src/routes/menuRoutes.js";
 import paymentRoutes from "./src/routes/paymentRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
-import mongoSanitize from "express-mongo-sanitize";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 const { link1, link2 } = process.env;
+
+app.use(helmet());
+
+app.use(hpp());
 
 app.use(
   cors({
@@ -37,6 +48,19 @@ app.use(
 app.options(/.*/, cors());
 app.use(express.json());
 
+app.use(xss());
+
+app.use((req, res, next) => {
+  if (req.body) req.body = mongoSanitize.sanitize(req.body);
+  if (req.params) req.params = mongoSanitize.sanitize(req.params);
+  if (req.query) req.query = mongoSanitize.sanitize(req.query);
+  next();
+});
+
+app.use(securityHeaders);
+app.use(detectBot);
+app.use("/api", apiLimiter);
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "someSecretKey",
@@ -47,10 +71,6 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(mongoSanitize());
-app.use(securityHeaders);
-app.use(detectBot);
-app.use("/api", apiLimiter);
 
 app.get("/", (req, res) => res.send("Ajay Cafe backend is running"));
 app.get("/google-success", (req, res) => res.send("Google Login Successful"));
