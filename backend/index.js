@@ -18,6 +18,7 @@ import cartRoutes from "./src/routes/cartRoutes.js";
 import menuRoutes from "./src/routes/menuRoutes.js";
 import paymentRoutes from "./src/routes/paymentRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
+import mongoSanitize from "express-mongo-sanitize";
 
 dotenv.config();
 
@@ -46,7 +47,7 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
-
+app.use(mongoSanitize());
 app.use(securityHeaders);
 app.use(detectBot);
 app.use("/api", apiLimiter);
