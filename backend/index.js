@@ -5,17 +5,13 @@ import session from "express-session";
 import passport from "./src/config/passport.js";
 import connectDB from "./src/db/db.connect.js";
 
-
-import helmet from "helmet";
-import hpp from "hpp";
-import xss from "xss-clean";
-import mongoSanitize from "express-mongo-sanitize";
-
-import {
-  securityHeaders,
-  apiLimiter,
-  detectBot,
-} from "./src/middlewares/security.js";
+// import {
+//   securityHeaders,
+//   apiLimiter,
+//   detectBot,
+// } from "./src/middlewares/security.js";
+// import { sanitizeRequest } from "./src/middlewares/sanitizeRequests.js";
+import { errorHandler } from "./src/middlewares/errorHandler.js";
 
 // Routes
 import userRoutes from "./src/routes/userRoutes.js";
@@ -26,55 +22,44 @@ import cartRoutes from "./src/routes/cartRoutes.js";
 import menuRoutes from "./src/routes/menuRoutes.js";
 import paymentRoutes from "./src/routes/paymentRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
+import verificationRoutes from "./src/routes/verificationRoutes.js";
 
 dotenv.config();
-
 const app = express();
 const PORT = process.env.PORT || 8080;
 const { link1, link2 } = process.env;
 
-app.use(helmet());
-
-app.use(hpp());
-
+// 🧠 Core security stack
+// app.use(securityHeaders);
+// app.use(hpp());
 app.use(
   cors({
     origin: ["http://localhost:5173", link1, link2],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.options(/.*/, cors());
 app.use(express.json());
-
-app.use(xss());
-
-app.use((req, res, next) => {
-  if (req.body) req.body = mongoSanitize.sanitize(req.body);
-  if (req.params) req.params = mongoSanitize.sanitize(req.params);
-  if (req.query) req.query = mongoSanitize.sanitize(req.query);
-  next();
-});
-
-app.use(securityHeaders);
-app.use(detectBot);
-app.use("/api", apiLimiter);
-
+// app.use(detectBot);
+// app.use("/api", apiLimiter);
+// app.use(sanitizeRequest);
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "someSecretKey",
+    secret: process.env.SESSION_SECRET || "supersecretkey",
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: false, // set to true when using HTTPS
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    },
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/", (req, res) => res.send("Ajay Cafe backend is running"));
-app.get("/google-success", (req, res) => res.send("Google Login Successful"));
-
+app.get("/", (req, res) => res.send("Ajay Café backend is running "));
+app.use("/api/verify", verificationRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/foods", foodRoutes);
@@ -84,21 +69,13 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/review", reviewRoutes);
 
-app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
-    success: false,
-    message: err.message || "Internal Server Error",
-    errors: err.errors || [],
-    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
-  });
-});
+app.use(errorHandler);
 
 const startServer = async () => {
   try {
     await connectDB(process.env.MONGO_URI);
     app.listen(PORT, () =>
-      console.log(`Server running at http://localhost:${PORT}`)
+      console.log(`Server running on http://localhost:${PORT}`)
     );
   } catch (error) {
     console.error("Server failed to start:", error.message);
