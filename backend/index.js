@@ -29,7 +29,6 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const { link1, link2 } = process.env;
 
-// 🧠 Core security stack
 // app.use(securityHeaders);
 // app.use(hpp());
 app.use(
@@ -74,7 +73,7 @@ app.use(errorHandler);
 const startServer = async () => {
   try {
     await connectDB(process.env.MONGO_URI);
-    app.listen(PORT, () =>
+    app.listen(PORT, "0.0.0.0", () =>
       console.log(`Server running on http://localhost:${PORT}`)
     );
   } catch (error) {
