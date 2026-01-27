@@ -17,7 +17,6 @@ const createOrder = asyncHandler(async (req, res) => {
       if (!food) throw new ApiError(404, `Food item not found: ${item.foodId}`);
       return {
         food: food._id,
-        name: food.name,
         price: food.price,
         quantity: item.quantity,
       };
@@ -33,7 +32,7 @@ const createOrder = asyncHandler(async (req, res) => {
     user: req.user._id,
     items: orderItems,
     tableNumber,
-    paymentMethod,
+    paymentMethod: paymentMethod || "cash",
     totalAmount,
   });
 
