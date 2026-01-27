@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
-import User from "../models/user.model.js";
 import dotenv from "dotenv";
+import User from "../models/user.model.js";
+import Admin from "../models/admin.model.js";
 
 dotenv.config();
 
 export const protect = async (req, res, next) => {
-  const authHeader = req.header("Authorization");
+  const authHeader = req.headers["authorization"];
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res
@@ -17,15 +18,28 @@ export const protect = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-    const user = await User.findById(decoded.sub).select("-password");
+
+    // console.log("DECODED TOKEN", decoded);
+    let user = null;
+
+    if (decoded.role === "admin") {
+      user = await Admin.findById(decoded.sub).select("-password");
+    } else {
+      user = await User.findById(decoded.sub).select("-password");
+    }
 
     if (!user) {
       return res
         .status(401)
-        .json({ success: false, message: "User not found." });
+        .json({ success: false, message: "User or Admin not found." });
     }
 
-    req.user = user;
+    req.user = {
+      _id: user._id,
+      role: user.role,
+      username: user.username || user.name,
+    };
+
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
@@ -40,10 +54,10 @@ export const protect = async (req, res, next) => {
 };
 
 export const admin = (req, res, next) => {
-  if (!req.user || req.user.role !== "owner") {
+  if (!req.user || req.user.role !== "admin") {
     return res
       .status(403)
-      .json({ success: false, message: "Access denied. Owner only." });
+      .json({ success: false, message: "Access denied. Admin only." });
   }
   next();
 };

@@ -10,5 +10,4 @@ models/
 ├── coupon.model.js
 ├── adminAnalytics.model.js
 ├── wishlist.model.js
-├── deliveryAnalytics.model.js
 └── transactionLog.model.js

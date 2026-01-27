@@ -15,8 +15,8 @@ passport.use(
       clientSecret: GOOGLE_CLIENT_SECRET,
       callbackURL:
         process.env.NODE_ENV === "production"
-          ? "https://ajay-cafe-1.onrender.com/user/google/callback"
-          : "http://localhost:8080/user/google/callback",
+          ? "https://ajay-cafe-1.onrender.com/api/user/google/callback"
+          : "http://localhost:8080/api/user/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {

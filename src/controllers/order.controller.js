@@ -21,12 +21,12 @@ const createOrder = asyncHandler(async (req, res) => {
         price: food.price,
         quantity: item.quantity,
       };
-    })
+    }),
   );
 
   const totalAmount = orderItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
-    0
+    0,
   );
 
   const order = await Order.create({
@@ -94,10 +94,22 @@ const deleteOrder = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, {}, "Order deleted successfully"));
 });
 
+const getUserOrders = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
+  console.log("UserOrders...", orders);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, orders, "User orders fetched successfully"));
+});
+
 export {
   deleteOrder,
   updateOrderStatus,
   getOrderById,
   getAllOrders,
   createOrder,
+  getUserOrders,
 };

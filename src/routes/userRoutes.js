@@ -5,6 +5,7 @@ import {
   logoutUser,
   updateUserProfile,
   googleCallback,
+  checkEmailExist,
 } from "../controllers/user.controller.js";
 import passport from "../config/passport.js";
 import { protect } from "../middlewares/auth.middleware.js";
@@ -15,6 +16,7 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 
 router.post("/logout", protect, logoutUser);
+router.head("/check-email/:email", checkEmailExist);
 router.put("/updateDetails", protect, updateUserProfile);
 router.get(
   "/google",

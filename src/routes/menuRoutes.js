@@ -11,7 +11,7 @@ import { protect, admin } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/create", protect, admin, createMenuItem);
+router.post("/create", protect, createMenuItem);
 router.get("/getMenu", getAllMenuItems);
 router.get("/getMenuById/:id", getMenuItemById);
 router.put("/update/:id", protect, admin, updateMenuItem);

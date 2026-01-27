@@ -9,10 +9,10 @@ import User from "../models/user.model.js";
 export const generateOTP = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
 
-const verifyOtp = async (organisationEmail, otp) => {
+const verifyOtp = async (email, otp) => {
   console.log("I have been hitted verify");
 
-  const hashedOtp = await redisClient.get(`otp:data:${organisationEmail}`);
+  const hashedOtp = await redisClient.get(`otp:user:${email}`);
   if (!hashedOtp) return false;
 
   const isOtpCorrect = await bcrypt.compare(otp, hashedOtp);
@@ -20,15 +20,12 @@ const verifyOtp = async (organisationEmail, otp) => {
 };
 
 const sendUserOTP = asyncHandler(async (req, res) => {
-  const OTP_EXPIRY = 5 * 60;
-  const RATE_LIMIT = 100;
-  const RESEND_LIMIT = 60;
+  const OTP_EXPIRY = 5 * 60; // 5 minutes
+  const RATE_LIMIT = 100; // per hour
+  const RESEND_LIMIT = 60; // 1 minute
 
   const { email } = req.body;
-
-  if (!email) {
-    throw new ApiError(400, "Email is required");
-  }
+  if (!email) throw new ApiError(400, "Email is required");
 
   const user = await User.findOne({ email });
   if (!user) throw new ApiError(404, "User not found");
@@ -54,7 +51,7 @@ const sendUserOTP = asyncHandler(async (req, res) => {
   });
 
   await redisClient.incr(`otp:count:${email}`);
-  await redisClient.expire(`otp:count:${email}`, 3600);
+  await redisClient.expire(`otp:count:${email}`, 3600); // 1 hour window
 
   await sendEmail(email, "Your Ajay_Cafe OTP Code", `Your OTP is: ${otp}`);
 
@@ -65,18 +62,12 @@ const sendUserOTP = asyncHandler(async (req, res) => {
 
 const verifyUserOTP = asyncHandler(async (req, res) => {
   const { email, otp } = req.body;
-
-  if (!email || !otp) {
-    throw new ApiError(400, "Email and OTP are required");
-  }
+  if (!email || !otp) throw new ApiError(400, "Email and OTP are required");
 
   const isCorrect = await verifyOtp(email, otp);
-  if (!isCorrect) {
-    throw new ApiError(400, "Invalid or expired OTP");
-  }
+  if (!isCorrect) throw new ApiError(400, "Invalid or expired OTP");
 
   await User.updateOne({ email }, { isVerified: true });
-
   await redisClient.del(`otp:user:${email}`);
 
   return res
@@ -92,18 +83,13 @@ const checkOtp = asyncHandler(async (req, res) => {
   if (!/^\S+@\S+\.\S+$/.test(email)) {
     throw new ApiError(400, "Please provide a valid email");
   }
+  if (!otp) throw new ApiError(400, "Please provide the email and OTP");
 
-  if (!otp) {
-    throw new ApiError(400, "Please provide the email and the otp");
-  }
-
-  const isCorrect = await verifyUserOTP(email, otp);
-
-  console.log(isCorrect);
+  const isCorrect = await verifyOtp(email, otp);
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { isCorrect }, "Otp checked "));
+    .json(new ApiResponse(200, { isCorrect }, "OTP checked successfully"));
 });
 
 export { sendUserOTP, verifyUserOTP, checkOtp };

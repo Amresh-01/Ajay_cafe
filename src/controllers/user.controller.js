@@ -60,26 +60,17 @@ const registerUser = asyncHandler(async (req, res) => {
 
   await user.save();
 
-  try {
-    await user.save();
-  } catch (err) {
-    if (err.name === "ValidationError") {
-      throw new ApiError(400, Object.values(err.errors)[0].message);
-    }
-    throw err;
-  }
-
   return res.status(201).json(
     new ApiResponse(
       201,
       {
-        id: user._id,
+        _id: user._id,
         username: user.username,
         email: user.email,
         role: user.role,
       },
-      "User registered successfully"
-    )
+      "User registered successfully",
+    ),
   );
 });
 
@@ -123,13 +114,13 @@ const loginUser = asyncHandler(async (req, res) => {
           email: user.email,
           role: user.role,
         },
-        "Login successful"
-      )
+        "Login successful",
+      ),
     );
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-  const userId = req.user?.id;
+  const userId = req.user?._id;
   if (!userId) throw new ApiError(401, "User is not authenticated");
 
   await User.findByIdAndUpdate(userId, { $unset: { refreshToken: 1 } });
@@ -148,7 +139,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const updateUserProfile = asyncHandler(async (req, res) => {
-  const userId = req.user?.id;
+  const userId = req.user?._id;
   const { newUsername, newEmail } = req.body;
 
   if (!userId) throw new ApiError(401, "User not authenticated");
@@ -161,7 +152,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       ...(newUsername && { username: newUsername }),
       ...(newEmail && { email: newEmail }),
     },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   ).select("-password -refreshToken");
 
   if (!updatedUser) throw new ApiError(404, "User not found");
@@ -169,6 +160,21 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, updatedUser, "Profile updated successfully"));
+});
+
+const checkEmailExist = asyncHandler(async (req, res) => {
+  const { email } = req.params;
+
+  if (!email) {
+    return res.status(400).end();
+  }
+
+  const user = await User.findOne({ email }).select("_id");
+
+  if (user) {
+    return res.status(200).end();
+  }
+  return res.status(404).end();
 });
 
 const googleCallback = async (req, res) => {
@@ -181,13 +187,19 @@ const googleCallback = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
+    const frontendURL =
+      process.env.NODE_ENV === "production"
+        ? "https://ajay-cafe-frontend.onrender.com"
+        : "http://localhost:5173";
+
     res.redirect(
-      `https://ajay-cafe-1.onrender.com/google-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
+      `${frontend}/google-success?accessToken=${accessToken}&refreshToken=${refreshToken}`,
     );
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Google login failed" });
   }
+  ``;
 };
 
 export {
@@ -196,4 +208,5 @@ export {
   logoutUser,
   updateUserProfile,
   googleCallback,
+  checkEmailExist,
 };

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
-    customer: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -65,13 +65,13 @@ const orderSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 orderSchema.pre("save", function (next) {
   this.totalAmount = this.items.reduce(
     (acc, item) => acc + item.price * item.quantity,
-    0
+    0,
   );
   next();
 });
