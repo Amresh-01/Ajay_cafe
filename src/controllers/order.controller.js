@@ -30,7 +30,7 @@ const createOrder = asyncHandler(async (req, res) => {
   );
 
   const order = await Order.create({
-    customer: req.user._id,
+    user: req.user._id,
     items: orderItems,
     tableNumber,
     paymentMethod,
@@ -44,7 +44,7 @@ const createOrder = asyncHandler(async (req, res) => {
 
 const getAllOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find()
-    .populate("customer", "name email")
+    .populate("user", "name email")
     .populate("items.food", "name price");
 
   res
@@ -54,7 +54,7 @@ const getAllOrders = asyncHandler(async (req, res) => {
 
 const getOrderById = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.orderId)
-    .populate("customer", "name email")
+    .populate("user", "name email")
     .populate("items.food", "name price");
 
   if (!order) {
