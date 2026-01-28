@@ -3,6 +3,7 @@ import Food from "../models/food.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
+import { io } from "../../index.js";
 
 const createOrder = asyncHandler(async (req, res) => {
   const { items, tableNumber, paymentMethod } = req.body;
@@ -66,7 +67,7 @@ const getOrderById = asyncHandler(async (req, res) => {
 });
 
 const updateOrderStatus = asyncHandler(async (req, res) => {
-  const { status } = req.body;
+  const { status, riderLocation } = req.body;
   const order = await Order.findById(req.params.orderId);
 
   if (!order) {
@@ -76,6 +77,14 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   order.status = status || order.status;
   await order.save();
 
+  io.emit(`order-${order._id}-status`, { status: order.status });
+
+  if (riderLocation) {
+    io.emit(`order-${order._id}-location`, {
+      lat: riderLocation.lat,
+      lng: riderLocation.lng,
+    });
+  }
   res
     .status(200)
     .json(new ApiResponse(200, order, "Order status updated successfully"));

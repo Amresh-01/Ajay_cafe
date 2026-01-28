@@ -4,16 +4,11 @@ import cors from "cors";
 import session from "express-session";
 import passport from "./src/config/passport.js";
 import connectDB from "./src/db/db.connect.js";
+import http from "http";
+import { Server } from "socket.io";
 
-// import {
-//   securityHeaders,
-//   apiLimiter,
-//   detectBot,
-// } from "./src/middlewares/security.js";
-// import { sanitizeRequest } from "./src/middlewares/sanitizeRequests.js";
 import { errorHandler } from "./src/middlewares/errorHandler.js";
 
-// Routes
 import userRoutes from "./src/routes/userRoutes.js";
 import foodRoutes from "./src/routes/foodRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
@@ -25,22 +20,35 @@ import adminRoutes from "./src/routes/adminRoutes.js";
 import verificationRoutes from "./src/routes/verificationRoutes.js";
 
 dotenv.config();
-const app = express();
-const PORT = process.env.PORT || 8080;
-const { link1, link2 } = process.env;
 
-// app.use(securityHeaders);
-// app.use(hpp());
+const app = express();
+const server = http.createServer(app);
+
+// SOCKET.IO CONFIG
+export const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:5173", process.env.link1, process.env.link2],
+    methods: ["GET", "POST"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", link1, link2],
+    origin: ["http://localhost:5173", process.env.link1, process.env.link2],
     credentials: true,
-  })
+  }),
 );
+
 app.use(express.json());
-// app.use(detectBot);
-// app.use("/api", apiLimiter);
-// app.use(sanitizeRequest);
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "supersecretkey",
@@ -48,16 +56,16 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // set to true when using HTTPS
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      secure: false,
+      maxAge: 24 * 60 * 60 * 1000,
     },
-  })
+  }),
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/", (req, res) => res.send("Ajay Café backend is running "));
+app.get("/", (req, res) => res.send("Ajay Café backend is running"));
 app.use("/api/verify", verificationRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
@@ -70,12 +78,16 @@ app.use("/api/review", reviewRoutes);
 
 app.use(errorHandler);
 
+const PORT = process.env.PORT || 8080;
+
 const startServer = async () => {
   try {
     await connectDB(process.env.MONGO_URI);
-    app.listen(PORT, "0.0.0.0", () =>
-      console.log(`Server running on http://localhost:${PORT}`)
-    );
+
+    server.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+      console.log("Socket.IO active...");
+    });
   } catch (error) {
     console.error("Server failed to start:", error.message);
     process.exit(1);

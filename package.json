@@ -13,6 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@react-google-maps/api": "^2.20.8",
     "@upstash/redis": "^1.35.6",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
@@ -37,6 +38,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "razorpay": "^2.9.6",
+    "socket.io": "^4.8.3",
     "xss": "^1.0.15",
     "xss-clean": "^0.1.4"
   }
