@@ -96,7 +96,9 @@ const deleteOrder = asyncHandler(async (req, res) => {
 const getUserOrders = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
+  const orders = await Order.find({ user: userId })
+    .populate("items.food", "name image price")
+    .sort({ createdAt: -1 });
   console.log("UserOrders...", orders);
 
   return res
