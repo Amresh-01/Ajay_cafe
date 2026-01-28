@@ -15,9 +15,8 @@ router.use(protect);
 router.post("/createOrder", createOrder);
 router.get("/userorder", getUserOrders);
 
-
 router.get("/allOrders", admin, getAllOrders);
-router.get("/:orderId", admin, getOrderById);
+router.get("/:orderId", getOrderById);
 router.delete("/:orderId", admin, deleteOrder);
 router.put("/status/:orderId", admin, updateOrderStatus);
 
