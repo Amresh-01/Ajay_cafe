@@ -10,7 +10,7 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-export const createOrder = asyncHandler(async (req, res) => {
+export const createRazorpayOrder = asyncHandler(async (req, res) => {
   const { amount } = req.body;
   const userId = req.user?._id;
 
@@ -40,8 +40,8 @@ export const createOrder = asyncHandler(async (req, res) => {
       new ApiResponse(
         201,
         { order: razorpayOrder, payment },
-        "Razorpay order created"
-      )
+        "Razorpay order created",
+      ),
     );
 });
 
@@ -61,7 +61,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
   if (expectedSignature !== razorpay_signature) {
     await Payment.findOneAndUpdate(
       { razorpayOrderId: razorpay_order_id },
-      { status: "failed" }
+      { status: "failed" },
     );
     throw new ApiError(400, "Invalid payment signature");
   }
@@ -73,7 +73,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       razorpaySignature: razorpay_signature,
       status: "paid",
     },
-    { new: true }
+    { new: true },
   );
 
   res
@@ -96,7 +96,7 @@ export const getPaymentById = asyncHandler(async (req, res) => {
 
   const payment = await Payment.findById(paymentId).populate(
     "user",
-    "username email"
+    "username email",
   );
 
   if (!payment) throw new ApiError(404, "Payment not found");
