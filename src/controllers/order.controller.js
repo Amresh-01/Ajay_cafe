@@ -116,63 +116,103 @@ const getUserOrders = asyncHandler(async (req, res) => {
 });
 
 export const getAnalytics = asyncHandler(async (req, res) => {
-  const totalOrders = await Order.countDocuments();
+  const today = new Date();
 
-  const revenueData = await Order.aggregate([
-    { $group: { _id: null, revenue: { $sum: "$totalAmount" } } },
-  ]);
-  const totalRevenue = revenueData[0]?.revenue || 0;
+  const weekAgo = new Date();
+  weekAgo.setDate(today.getDate() - 7);
 
-  const last7Days = await Order.aggregate([
+  const weekly = await Order.aggregate([
+    { $match: { createdAt: { $gte: weekAgo } } },
     {
       $group: {
         _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-        count: { $sum: 1 },
+        revenue: { $sum: "$totalAmount" },
       },
     },
     { $sort: { _id: 1 } },
-    { $limit: 7 },
   ]);
 
-  const ordersPerDay = last7Days.map((d) => ({
-    day: d._id,
-    count: d.count,
-  }));
-
-  const paymentStats = await Order.aggregate([
-    { $group: { _id: "$paymentMethod", count: { $sum: 1 } } },
-  ]);
-
-  const payments = {
-    cash: paymentStats.find((p) => p._id === "cash")?.count || 0,
-    card: paymentStats.find((p) => p._id === "card")?.count || 0,
-    upi: paymentStats.find((p) => p._id === "upi")?.count || 0,
-  };
-
-  const topItemData = await Order.aggregate([
-    { $unwind: "$items" },
-    { $group: { _id: "$items.food", qty: { $sum: "$items.quantity" } } },
-    { $sort: { qty: -1 } },
-    { $limit: 1 },
-  ]);
-
-  let topItem = null;
-  if (topItemData.length > 0) {
-    topItem = await Food.findById(topItemData[0]._id).select("name price");
-  }
-
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      {
-        totalOrders,
-        totalRevenue,
-        ordersPerDay,
-        payments,
-        topItem,
+  const hourly = await Order.aggregate([
+    {
+      $group: {
+        _id: { hour: { $hour: "$createdAt" } },
+        count: { $sum: 1 },
       },
-      "Analytics fetched successfully",
-    ),
+    },
+    { $sort: { "_id.hour": 1 } },
+  ]);
+
+  const categorySales = await Order.aggregate([
+    { $unwind: "$items" },
+    {
+      $lookup: {
+        from: "foods",
+        localField: "items.food",
+        foreignField: "_id",
+        as: "foodDetails",
+      },
+    },
+    { $unwind: "$foodDetails" },
+    {
+      $group: {
+        _id: "$foodDetails.category",
+        count: { $sum: "$items.quantity" },
+      },
+    },
+  ]);
+
+  const topItems = await Order.aggregate([
+    { $unwind: "$items" },
+    {
+      $group: {
+        _id: "$items.food",
+        totalSold: { $sum: "$items.quantity" },
+      },
+    },
+    {
+      $lookup: {
+        from: "foods",
+        localField: "_id",
+        foreignField: "_id",
+        as: "foodDetails",
+      },
+    },
+    { $unwind: "$foodDetails" },
+    { $sort: { totalSold: -1 } },
+    { $limit: 5 },
+  ]);
+
+  const customerStats = await Order.aggregate([
+    {
+      $group: {
+        _id: "$user",
+        orders: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const newCustomers = customerStats.filter((c) => c.orders === 1).length;
+  const returningCustomers = customerStats.filter((c) => c.orders > 1).length;
+
+  const funnel = await Order.aggregate([
+    {
+      $group: {
+        _id: "$status",
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  res.json(
+    new ApiResponse(200, {
+      weekly,
+      hourly,
+      categorySales,
+      topItems,
+      newCustomers,
+      returningCustomers,
+      funnel,
+    }),
   );
 });
 
