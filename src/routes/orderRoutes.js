@@ -18,7 +18,7 @@ router.get("/userorder", getUserOrders);
 
 router.get("/allOrders", admin, getAllOrders);
 router.get("/analytics", admin, getAnalytics);
-router.delete("/deleteOrder", deleteOrder);
+router.delete("/deleteOrder/:orderId", deleteOrder);
 router.get("/:orderId", getOrderById);
 router.delete("/:orderId", admin, deleteOrder);
 router.put("/status/:orderId", admin, updateOrderStatus);
