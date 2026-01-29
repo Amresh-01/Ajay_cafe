@@ -115,6 +115,67 @@ const getUserOrders = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, orders, "User orders fetched successfully"));
 });
 
+export const getAnalytics = asyncHandler(async (req, res) => {
+  const totalOrders = await Order.countDocuments();
+
+  const revenueData = await Order.aggregate([
+    { $group: { _id: null, revenue: { $sum: "$totalAmount" } } },
+  ]);
+  const totalRevenue = revenueData[0]?.revenue || 0;
+
+  const last7Days = await Order.aggregate([
+    {
+      $group: {
+        _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+    { $limit: 7 },
+  ]);
+
+  const ordersPerDay = last7Days.map((d) => ({
+    day: d._id,
+    count: d.count,
+  }));
+
+  const paymentStats = await Order.aggregate([
+    { $group: { _id: "$paymentMethod", count: { $sum: 1 } } },
+  ]);
+
+  const payments = {
+    cash: paymentStats.find((p) => p._id === "cash")?.count || 0,
+    card: paymentStats.find((p) => p._id === "card")?.count || 0,
+    upi: paymentStats.find((p) => p._id === "upi")?.count || 0,
+  };
+
+  const topItemData = await Order.aggregate([
+    { $unwind: "$items" },
+    { $group: { _id: "$items.food", qty: { $sum: "$items.quantity" } } },
+    { $sort: { qty: -1 } },
+    { $limit: 1 },
+  ]);
+
+  let topItem = null;
+  if (topItemData.length > 0) {
+    topItem = await Food.findById(topItemData[0]._id).select("name price");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        totalOrders,
+        totalRevenue,
+        ordersPerDay,
+        payments,
+        topItem,
+      },
+      "Analytics fetched successfully",
+    ),
+  );
+});
+
 export {
   deleteOrder,
   updateOrderStatus,

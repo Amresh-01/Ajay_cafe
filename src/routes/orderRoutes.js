@@ -6,6 +6,7 @@ import {
   updateOrderStatus,
   deleteOrder,
   getUserOrders,
+  getAnalytics,
 } from "../controllers/order.controller.js";
 import { protect, admin } from "../middlewares/auth.middleware.js";
 
@@ -16,6 +17,7 @@ router.post("/createOrder", createOrder);
 router.get("/userorder", getUserOrders);
 
 router.get("/allOrders", admin, getAllOrders);
+router.get("/analytics", admin, getAnalytics);
 router.get("/:orderId", getOrderById);
 router.delete("/:orderId", admin, deleteOrder);
 router.put("/status/:orderId", admin, updateOrderStatus);
