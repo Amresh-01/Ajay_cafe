@@ -108,7 +108,6 @@ const getUserOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find({ user: userId })
     .populate("items.food", "name image price")
     .sort({ createdAt: -1 });
-  console.log("UserOrders...", orders);
 
   return res
     .status(200)
