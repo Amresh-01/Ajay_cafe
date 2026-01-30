@@ -19,7 +19,7 @@ export const createRazorpayOrder = asyncHandler(async (req, res) => {
   }
 
   const options = {
-    amount: Math.round(amount * 100),
+    amount: Math.round(amount * 100), // convert to paisa
     currency: "INR",
     receipt: `rcpt_${Date.now()}`,
     payment_capture: 1,
@@ -34,7 +34,7 @@ export const createRazorpayOrder = asyncHandler(async (req, res) => {
     status: "created",
   });
 
-  res
+  return res
     .status(201)
     .json(
       new ApiResponse(
@@ -76,7 +76,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     { new: true },
   );
 
-  res
+  return res
     .status(200)
     .json(new ApiResponse(200, payment, "Payment verified successfully"));
 });
@@ -86,7 +86,7 @@ export const getAllPayments = asyncHandler(async (req, res) => {
     .populate("user", "username email")
     .sort({ createdAt: -1 });
 
-  res
+  return res
     .status(200)
     .json(new ApiResponse(200, payments, "All payments fetched successfully"));
 });
@@ -101,7 +101,7 @@ export const getPaymentById = asyncHandler(async (req, res) => {
 
   if (!payment) throw new ApiError(404, "Payment not found");
 
-  res
+  return res
     .status(200)
     .json(new ApiResponse(200, payment, "Payment fetched successfully"));
 });
