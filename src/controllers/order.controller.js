@@ -37,6 +37,8 @@ const createOrder = asyncHandler(async (req, res) => {
     totalAmount,
   });
 
+  io.emit("kids-new-order", order);
+
   res
     .status(201)
     .json(new ApiResponse(201, order, "Order placed successfully"));
@@ -77,6 +79,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   order.status = status || order.status;
   await order.save();
 
+  io.emit("kds-status-updated", order);
   io.emit(`order-${order._id}-status`, { status: order.status });
 
   if (riderLocation) {

@@ -24,7 +24,6 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// SOCKET.IO CONFIG
 export const io = new Server(server, {
   cors: {
     origin: ["http://localhost:5173", process.env.link1, process.env.link2],
@@ -46,8 +45,9 @@ app.use(
     credentials: true,
   }),
 );
-
+app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(
   session({
