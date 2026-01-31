@@ -37,7 +37,7 @@ const createOrder = asyncHandler(async (req, res) => {
     totalAmount,
   });
 
-  io.emit("kids-new-order", order);
+  io.emit("kds-new-order", order);
 
   res
     .status(201)

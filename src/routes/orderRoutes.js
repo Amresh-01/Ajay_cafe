@@ -9,6 +9,7 @@ import {
   getAnalytics,
 } from "../controllers/order.controller.js";
 import { protect, admin } from "../middlewares/auth.middleware.js";
+import Order from "../models/order.model.js";
 
 const router = express.Router();
 router.use(protect);
