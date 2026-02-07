@@ -7,6 +7,14 @@ import connectDB from "./src/db/db.connect.js";
 import http from "http";
 import { Server } from "socket.io";
 
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import mongoSanitize from "express-mongo-sanitize";
+import xssClean from "xss-clean";
+import hpp from "hpp";
+import cookieParser from "cookie-parser";
+import csurf from "csurf";
+
 import { errorHandler } from "./src/middlewares/errorHandler.js";
 
 import userRoutes from "./src/routes/userRoutes.js";
@@ -39,16 +47,40 @@ io.on("connection", (socket) => {
   });
 });
 
+app.use(helmet());
+app.use(mongoSanitize());
+app.use(xssClean());
+app.use(hpp());
+
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+app.use(cookieParser());
+app.use(csurf({ cookie: true }));
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: "Too many requests from this IP, please try again later.",
+});
+// app.use(
+//   cors({
+//     origin: ["http://localhost:5173", process.env.link1, process.env.link2],
+//     credentials: true,
+//   }),
+// );
+app.use("/api", apiLimiter);
+app.disable("x-powered-by");
+
+// app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
+
 app.use(
   cors({
     origin: ["http://localhost:5173", process.env.link1, process.env.link2],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
-app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "supersecretkey",
