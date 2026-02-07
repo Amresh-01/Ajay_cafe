@@ -13,7 +13,7 @@ import mongoSanitize from "express-mongo-sanitize";
 import xssClean from "xss-clean";
 import hpp from "hpp";
 import cookieParser from "cookie-parser";
-import csurf from "csurf";
+// import csurf from "csurf";
 
 import { errorHandler } from "./src/middlewares/errorHandler.js";
 
@@ -55,7 +55,7 @@ app.use(hpp());
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
-app.use(csurf({ cookie: true }));
+// app.use(csurf({ cookie: true }));
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
