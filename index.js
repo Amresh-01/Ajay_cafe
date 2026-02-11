@@ -69,14 +69,29 @@ app.disable("x-powered-by");
 
 // app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.link1,
+  process.env.link2,
+].filter(Boolean); // remove undefined
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", process.env.link1, process.env.link2],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // for Postman / mobile apps
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log("BLOCKED ORIGIN:", origin);
+        callback(new Error("CORS: Not allowed"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "supersecretkey",
