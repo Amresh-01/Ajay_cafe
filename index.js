@@ -32,6 +32,7 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
+app.set("trust proxy", 1);
 export const io = new Server(server, {
   cors: {
     origin: ["http://localhost:5173", process.env.link1, process.env.link2],
@@ -62,12 +63,7 @@ const apiLimiter = rateLimit({
   max: 200,
   message: "Too many requests from this IP, please try again later.",
 });
-// app.use(
-//   cors({
-//     origin: ["http://localhost:5173", process.env.link1, process.env.link2],
-//     credentials: true,
-//   }),
-// );
+
 app.use("/api", apiLimiter);
 app.disable("x-powered-by");
 
